@@ -1,0 +1,10 @@
+{% load i18n stringutils %}{% blocktrans with contest_name=msg.contest.name %}
+
+A new public question in category has just been revealed in contest {{ contest_name }}.{% endblocktrans %}
+
+    {{ msg.problem_instance|default_if_none:_("General") }}: {{ msg.topic }}
+
+{{ msg.content|safe|wordwrap:80|indent }}
+
+
+{% blocktrans %}Please visit {{ msg_link }} to answer it.{% endblocktrans %}

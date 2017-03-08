@@ -4,35 +4,130 @@
 {% load pagination_tags %}
 
 {% block title %}{% trans "Questions and news" %}{% endblock %}
-
 {% block content %}
 <h2>{% trans "Questions and news" %}</h2>
+
+<script>
+$(function() {
+    const sub_text = gettext("Subscribe");
+    const sub_icon = 'icon-plus';
+    const unsub_text = gettext("Unsubscribe");
+    const unsub_icon = 'icon-remove';
+    const sub_url = "subscription/";
+    const token = $.cookie("csrftoken");
+    let subscribed;
+
+    function set_sub_btn(subscribed) {
+        $('#sub-btn').attr('disabled', false)
+        $('#sub-text').text(subscribed ? unsub_text : sub_text);
+        $('#sub-icon').attr('class', subscribed ? unsub_icon : sub_icon);
+    }
+
+    function sub_btn_busy() {
+        $('#sub-btn').attr('disabled', true)
+        // This doesn't rotate, but the icon looks ugly anyway
+        // TODO possibly use the cog icon from font awesome
+        $('#sub-icon').attr('class', 'icon-refresh icon-spin')
+    }
+
+    function show_success_banner() {
+        const banner_showtime = 3000; // ms
+        $('#unsubscribe-prefix').text(subscribed ? '' : 'un');
+        $('.sub-success').fadeIn();
+        window.setTimeout(function(){
+            console.log("hi!!")
+            $('.sub-success').fadeOut();
+        }, banner_showtime);
+    }
+
+    function add_subscription() {
+        sub_btn_busy();
+        $.post(
+            sub_url,
+            {
+                csrfmiddlewaretoken: token,
+                add_subscription: !subscribed
+            }
+        ).done(function() {
+            subscribed = !subscribed;
+            set_sub_btn(subscribed);
+            show_success_banner();
+        }).fail(function() {
+            set_sub_btn(subscribed); // resets the button
+        });
+    }
+
+    subscribed = "{{ already_subscribed }}" === "True";
+    set_sub_btn(subscribed);
+    $('#sub-btn').click(add_subscription);
+});
+</script>
+<style>
+    .sub-success {
+        display: none
+    }
+    .icon-spin {
+       animation: spin 1s infinite linear;
+    }
+
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    #sub-icon {
+        display: none
+    }
+    @media screen and (max-width: 1240px) {
+        #sub-icon {
+            display: inline-block;
+        }
+    }
+</style>
+
 {% check_perm 'contests.contest_admin' for contest as is_admin %}
 {% if user.is_authenticated %}
 <div class="corner-icons">
     <ul>
+        {% if not onsite %}
+            <li>
+                <button class="btn btn-default btn-small" id="sub-btn"
+                {% if no_email %} title="You need to add an e-mail address to your account" disabled {% endif %}>
+                    <i class="icon-envelope"></i>
+                    <i id="sub-icon"></i>
+                    <span id="sub-text" class="toolbar-button-text"></span>
+                </button>
+            </li>
+        {% endif %}
         <li>
             {% if is_admin %}
-            <a class="btn btn-small" href="{% url 'add_contest_message' contest_id=contest.id %}">
-                <i class="icon-comment"></i>
-                <span class="toolbar-button-text">{% trans "Add news" %}</span>
-            </a>
+                <a class="btn btn-default btn-small" href="{% url 'add_contest_message' contest_id=contest.id %}">
+                    <i class="icon-comment"></i>
+                    <span class="toolbar-button-text">{% trans "Add news" %}</span>
+                </a>
             {% elif categories %}
-            <a class="btn btn-small" href="{% url 'add_contest_message' contest_id=contest.id %}">
-                <i class="icon-question-sign"></i>
-                <span class="toolbar-button-text">{% trans "Ask a question" %}</span>
-            </a>
+                <a class="btn btn-default btn-small" href="{% url 'add_contest_message' contest_id=contest.id %}">
+                    <i class="icon-question-sign"></i>
+                    <span class="toolbar-button-text">{% trans "Ask a question" %}</span>
+                </a>
             {% endif %}
         </li>
         {% if is_admin %}
-        <li>
-            <a class="btn btn-small" href="{% url 'oioioiadmin:questions_replytemplate_changelist' %}">
-                <i class="icon-pencil"></i>
-                <span class="toolbar-button-text">{% trans "Edit reply templates" %}</span>
-            </a>
-        </li>
+            <li>
+                <a class="btn btn-default btn-small" href="{% url 'oioioiadmin:questions_replytemplate_changelist' %}">
+                    <i class="icon-pencil"></i>
+                    <span class="toolbar-button-text">{% trans "Edit reply templates" %}</span>
+                </a>
+            </li>
         {% endif %}
     </ul>
+</div>
+<div class="alert alert-success sub-success">
+  <strong>{% trans "Success!" %}</strong> You successfully <span id="unsubscribe-prefix"></span>subscribed.
 </div>
 {% endif %}
 {% if records %} <div class="paginated-list"> {% endif %}
