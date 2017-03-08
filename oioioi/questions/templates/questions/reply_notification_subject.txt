@@ -1,0 +1,2 @@
+{% load i18n %}
+New public question: [{{ msg.contest }}][{{ msg.problem_instance|default_if_none:_("General") }}] {{ msg.topic|truncatewords:8 }}

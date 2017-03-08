@@ -13,7 +13,7 @@ from oioioi.contests.utils import is_contest_admin
 from oioioi.questions.forms import ChangeContestMessageForm
 from oioioi.questions.models import Message, MessageNotifierConfig, \
                                     ReplyTemplate
-
+from oioioi.questions.mails import new_reply_signal
 
 class MessageAdmin(admin.ModelAdmin):
     list_display = ['id', 'date', 'topic', 'author']
@@ -63,6 +63,14 @@ class MessageAdmin(admin.ModelAdmin):
                 form.save()
                 super(MessageAdmin, self).log_change(request, message,
                                                      change_message)
+                if 'kind' in form.changed_data and \
+                        form.cleaned_data['kind'] == 'PUBLIC':
+                    new_reply_signal.send(
+                        sender=Message,
+                        request=request,
+                        instance=message
+                    )
+
                 return redirect('contest_messages',
                                 contest_id=request.contest.id)
         else:
