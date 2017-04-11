@@ -55,8 +55,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         while True:
-            messages = Message.objects.all()
-            # TODO filter by pub date, etc.
+            messages = Message.objects.all(
+                mail_sent=False,
+                pub_date__lte=datetime.now()
+            )
             for msg in messages:
                 mailnotify(msg)
             time.sleep(settings.MAILNOTIFYD_INTERVAL)

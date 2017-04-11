@@ -39,6 +39,8 @@ class Message(models.Model):
             verbose_name=_("date"))
     pub_date = models.DateTimeField(default=None, blank=True, null=True,
             verbose_name=_("publication date"))
+    mail_sent = models.BooleanField(default=False,
+            verbose_name=_("mail notification sent"))
 
     def save(self, *args, **kwargs):
         # Assert integrity in this Message
