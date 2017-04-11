@@ -14,6 +14,7 @@ def mailnotify(instance):
         }
     )
     print msg_link
+    return
     context = {'msg': instance, 'msg_link': msg_link}
 
     subject = render_to_string(
@@ -54,7 +55,6 @@ class Command(BaseCommand):
         while True:
             #messages = Message.objects.filter(mail_sent=False)
             # TODO filter by pub date, etc.
-            #for msg in messages:
-            #    mailnotify(msg)
-            print full_url
+            for msg in messages:
+                mailnotify(msg)
             time.sleep(settings.MAILNOTIFYD_INTERVAL)
