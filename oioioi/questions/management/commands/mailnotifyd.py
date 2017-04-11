@@ -1,10 +1,15 @@
 import time
+from datetime import datetime
 
-from django.core.management.base import BaseCommand
-from django.utils.translation import ugettext as _
 from django.conf import settings
-from oioioi.questions.models import Message, QuestionSubscription
+from django.core.mail import EmailMessage
+from django.core.management.base import BaseCommand
 from django.core.urlresolvers import reverse
+from django.template.loader import render_to_string
+from django.utils.translation import ugettext as _
+
+from oioioi.questions.models import Message, QuestionSubscription
+
 
 def mailnotify(instance):
     m_id = instance.top_reference.id if instance.top_reference else instance.id
@@ -39,14 +44,20 @@ def mailnotify(instance):
         # if there are any users with e-mails
         if mails:
             email = EmailMessage(subject=subject, body=body, bcc=mails)
+            print "Sending a public mail"
+            print email
             email.send(fail_silently=True)
     else:  # PRIVATE
         author = instance.top_reference.author
         subscriptions = subscriptions.filter(user=author)
         if subscriptions and author.email:
             email = EmailMessage(subject=subject, body=body, to=[author.email])
+            print "Sending a private mail"
+            print email
             email.send(fail_silently=True)
 
+    instance.mail_sent = True
+    instance.save()
 
 class Command(BaseCommand):
     help = _(
@@ -55,7 +66,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         while True:
-            messages = Message.objects.all(
+            messages = Message.objects.filter(
                 mail_sent=False,
                 pub_date__lte=datetime.now()
             )

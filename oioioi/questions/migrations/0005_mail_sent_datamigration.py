@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 
 
-def toggle_mail_sent():
+def toggle_mail_sent(apps, schema_editor):
     Message = apps.get_model("questions", "Message")
     for msg in Message.objects.all():
         msg.mail_sent = True
