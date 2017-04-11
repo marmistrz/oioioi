@@ -24,8 +24,7 @@ from oioioi.questions.forms import AddContestMessageForm, AddReplyForm, \
     FilterMessageForm, FilterMessageAdminForm
 from oioioi.questions.models import Message, MessageView, ReplyTemplate, \
     QuestionSubscription
-from oioioi.questions.mails import new_question_signal, \
-    new_reply_signal
+from oioioi.questions.mails import new_question_signal
 
 
 def visible_messages(request, author=None, category=None):
@@ -180,12 +179,6 @@ def message_view(request, message_id):
                 instance.author = request.user
                 instance.date = request.timestamp
                 instance.save()
-
-                new_reply_signal.send(
-                    sender=Message,
-                    request=request,
-                    instance=instance
-                )
 
                 log_addition(request, instance)
                 return redirect('contest_messages',
