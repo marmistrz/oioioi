@@ -4,17 +4,19 @@ from django.core.management.base import BaseCommand
 from django.utils.translation import ugettext as _
 from django.conf import settings
 from oioioi.questions.models import Message, QuestionSubscription
+from django.core.urlresolvers import reverse
 
 def mailnotify(instance):
+    m_id = instance.top_reference.id if instance.top_reference else instance.id
     msg_link = reverse(
         'message',
         kwargs={
             'contest_id': instance.contest,
-            'message_id': instance.top_reference.id
+            'message_id': m_id
         }
     )
-    print msg_link
-    return
+
+    msg_link = settings.DISPLAYED_ROOT_URL + msg_link
     context = {'msg': instance, 'msg_link': msg_link}
 
     subject = render_to_string(
@@ -53,7 +55,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         while True:
-            #messages = Message.objects.filter(mail_sent=False)
+            messages = Message.objects.all()
             # TODO filter by pub date, etc.
             for msg in messages:
                 mailnotify(msg)

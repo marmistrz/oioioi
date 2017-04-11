@@ -21,7 +21,7 @@ INTERNAL_IPS = ('127.0.0.1',)
 
 # Site name displayed in the title
 SITE_NAME = 'OIOIOI'
-ROOT_URL = 'http://localhost/'
+DISPLAYED_ROOT_URL = 'http://localhost'
 
 # Run uwsgi daemon. Shall be True, False or 'auto'.
 # 'auto' means daemon will be run iff DEBUG is disabled.
