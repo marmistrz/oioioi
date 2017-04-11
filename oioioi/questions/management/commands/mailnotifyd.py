@@ -61,7 +61,12 @@ def mailnotify(instance):
 
 class Command(BaseCommand):
     help = _(
-        "mailnotifyd" # TODO
+        """
+        Periodically scans the whole database for messages with unsent
+        notifications.
+        We can't do this easily without a daemon since we have to support
+        delayed publishing of news
+        """
     )
 
     def handle(self, *args, **options):

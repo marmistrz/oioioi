@@ -12,6 +12,7 @@ from oioioi.programs.controllers import ProgrammingContestController
 from oioioi.questions.models import Message, ReplyTemplate
 from oioioi.base.notification import NotificationHandler
 from .views import visible_messages
+from oioioi.questions.management.commands.mailnotifyd import mailnotify
 
 from datetime import datetime
 
@@ -481,53 +482,19 @@ class TestQuestions(TestCase):
         self.assertEqual(data[1][0], u'private-answer')
 
     def test_mail_notifications(self):
-        # Test user asks a new question
-        self.client.login(username='test_user2')
-        contest = Contest.objects.get()
-        pi = ProblemInstance.objects.get()
-        url = reverse('add_contest_message', kwargs={'contest_id': contest.id})
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-
-        post_data = {
-                'category': 'p_%d' % (pi.id,),
-                'topic': 'the-new-question',
-                'content': 'the-new-body',
-            }
-        response = self.client.post(url, post_data)
-        self.assertEqual(response.status_code, 302)
-        new_question = Message.objects.get(topic='the-new-question')
-
-        # Test admin replies his question
-        self.client.login(username='test_admin')
-        list_url = reverse('contest_messages',
-                kwargs={'contest_id': contest.id})
-        response = self.client.get(list_url)
-        self.assertIn('the-new-question', response.content)
-
-        url = reverse('message', kwargs={'contest_id': contest.id,
-            'message_id': new_question.id})
-        response = self.client.get(url)
-        self.assertIn('form', response.context)
-
-        post_data = {
-                'kind': 'PRIVATE',
-                'topic': 're-new-question',
-                'content': 're-new-body',
-                'save_template': True,
-            }
-        response = self.client.post(url, post_data)
-        self.assertEqual(response.status_code, 302)
-
-        # Check if a notification for user was send
-        self.assertEquals(len(mail.outbox), 1)
-        # notification for admin and for user
+        # Notify about a private message
+        message = Message.objects.get(pk=3)
+        mailnotify(message)
         m = mail.outbox[0]
-        print type(mail.outbox[0])
+        self.assertEquals(len(mail.outbox), 1)
         self.assertIn("New public question", m.subject)
         self.assertEquals("test_user2@example.com", m.to[0])
         self.assertIn("public question in category has just been rev", m.body)
         self.assertIn("re-new-body", m.body)
+        # Do not notify about a question
+        question = Message.objects.get(pk=2)
+        mailnotify(question)
+        self.assertEquals(len(mail.outbox), 1)
 
 
 class TestUserInfo(TestCase):
