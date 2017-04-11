@@ -13,7 +13,7 @@ djcelery.setup_loader()
 import oioioi
 from oioioi.contests.current_contest import ContestMode
 
-INSTALLATION_CONFIG_VERSION = 7
+INSTALLATION_CONFIG_VERSION = 11
 
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
@@ -21,6 +21,7 @@ INTERNAL_IPS = ('127.0.0.1',)
 
 # Site name displayed in the title
 SITE_NAME = 'OIOIOI'
+ROOT_URL = 'http://localhost/'
 
 # Run uwsgi daemon. Shall be True, False or 'auto'.
 # 'auto' means daemon will be run iff DEBUG is disabled.
@@ -256,7 +257,6 @@ PROBLEM_PACKAGE_BACKENDS = (
     'oioioi.sinolpack.package.SinolPackageBackend',
 )
 
-SAFE_EXEC_MODE = 'vcpu'
 SUBMITTABLE_EXTENSIONS = {'C': ['c'], 'C++': ['cpp', 'cc'], 'Pascal': ['pas']}
 USE_UNSAFE_EXEC = False
 USE_LOCAL_COMPILERS = False
@@ -377,10 +377,6 @@ EVALMGR_CONCURRENCY = 1
 # Number of concurrently processed problem packages
 UNPACKMGR_CONCURRENCY = 1
 
-# Split-priority evaluation
-ENABLE_SPLITEVAL = False
-SPLITEVAL_EVALMGR = False
-
 SIOWORKERSD_URL = 'http://localhost:7889/'
 
 # ID of JotForm account for "Send Feedback" link.
@@ -419,9 +415,6 @@ ZEUS_RESULTS_FETCH_DELAY = 3  # seconds
 ZEUS_CONNECTION_TIMEOUT = 10  # seconds
 ZEUS_SEND_RETRIES = 3
 ZEUS_RETRY_SLEEP = 1  # second
-
-# Filelock
-FILELOCK_BASEDIR = os.path.join(tempfile.gettempdir(), 'oioioi-filelocks')
 
 # Cache
 CACHES = {
@@ -486,3 +479,7 @@ MAINTENANCE_MODE_IGNORE_URLS = [
 # Domain to use for serving IP to hostname mappings
 # using ./manage.py ipauth-dnsserver
 IPAUTH_DNSSERVER_DOMAIN = None
+
+# Interval [in seconds] for mailnotifyd to wait before scanning the database
+# for new messages to notify for
+MAILNOTIFYD_INTERVAL = 60
