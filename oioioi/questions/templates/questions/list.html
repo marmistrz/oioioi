@@ -25,8 +25,6 @@ $(function() {
 
     function sub_btn_busy() {
         $('#sub-btn').attr('disabled', true)
-        // This doesn't rotate, but the icon looks ugly anyway
-        // TODO possibly use the cog icon from font awesome
         $('#sub-icon').attr('class', 'icon-refresh icon-spin')
     }
 
@@ -35,7 +33,6 @@ $(function() {
         $('#unsubscribe-prefix').text(subscribed ? '' : 'un');
         $('.sub-success').fadeIn();
         window.setTimeout(function(){
-            console.log("hi!!")
             $('.sub-success').fadeOut();
         }, banner_showtime);
     }
